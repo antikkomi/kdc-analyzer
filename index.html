@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDC 도서 청구기호 분석기</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            padding: 20px;
+            line-height: 1.8;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #1a73e8;
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #1a73e8;
+        }
+
+        button {
+            padding: 0 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #1557b0;
+        }
+
+        #result {
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-left: 8px solid #1a73e8;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .highlight {
+            color: #d93025;
+            font-weight: bold;
+        }
+
+        .example {
+            margin-top: 25px;
+            background: #eef5ff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📚 KDC 도서 청구기호 분석기</h2>
+
+    <div class="input-group">
+        <input type="text" id="callNumber" placeholder="예: 911.05가56ㄱ v.1 c.2">
+        <button onclick="analyze()">분석하기</button>
+    </div>
+
+    <div class="example">
+        <strong>입력 예시</strong><br>
+        911.05가56ㄱ v.1 c.2<br>
+        813.6김64ㅎ<br>
+        005박32ㅈ
+    </div>
+
+    <div id="result"></div>
+</div>
+
+<script>
+const kdcData = {
+    "000": "총류",
+    "004": "컴퓨터과학",
+    "005": "프로그래밍, 프로그램, 데이터",
+    "020": "문헌정보학",
+
+    "100": "철학",
+    "150": "동양철학",
+    "160": "서양철학",
+    "170": "논리학",
+    "180": "심리학",
+    "190": "윤리학",
+
+    "200": "종교",
+    "220": "불교",
+    "230": "기독교",
+
+    "300": "사회과학",
+    "320": "경제학",
+    "325": "경영",
+    "330": "사회학",
+    "338": "사회복지",
+    "340": "정치학",
+    "360": "법률",
+    "370": "교육학",
+
+    "400": "자연과학",
+    "410": "수학",
+    "420": "물리학",
+    "430": "화학",
+    "470": "생명과학",
+
+    "500": "기술과학",
+    "510": "의학",
+    "530": "공학",
+    "540": "건축학",
+    "550": "기계공학",
+    "560": "전자공학",
+    "590": "생활과학",
+
+    "600": "예술",
+    "620": "조각, 조형미술",
+    "630": "공예",
+    "640": "서예",
+    "650": "회화, 디자인",
+    "660": "사진예술",
+    "670": "음악",
+    "680": "공연예술",
+    "690": "오락, 스포츠",
+
+    "700": "언어",
+    "710": "한국어",
+    "720": "중국어",
+    "730": "일본어",
+    "740": "영어",
+
+    "800": "문학",
+    "810": "한국문학",
+    "811": "한국 시",
+    "813": "한국 소설",
+    "814": "한국 수필",
+    "820": "중국문학",
+    "830": "일본문학",
+    "840": "영미문학",
+    "843": "영미 소설",
+
+    "900": "역사",
+    "909": "세계사",
+    "910": "아시아 역사",
+    "911": "한국 역사",
+    "912": "중국 역사",
+    "913": "일본 역사",
+    "920": "유럽 역사",
+    "980": "지리",
+    "990": "전기"
+};
+
+function analyze() {
+    const input = document.getElementById('callNumber').value.trim();
+    const normalized = input.replace(/\s+/g, '');
+
+    const resultDiv = document.getElementById('result');
+
+    if (!input) {
+        alert('청구기호를 입력해주세요!');
+        return;
+    }
+
+    const classification = normalized.match(/^\d+(\.\d+)?/)?.[0];
+    const authorMatch = normalized.match(/([가-힣])(\d+)([가-힣ㄱ-ㅎ])/);
+    const volMatch = normalized.match(/v\.\d+/i);
+    const copyMatch = normalized.match(/c\.\d+/i);
+
+    let html = '';
+
+    if (classification) {
+        const exactCode = classification;
+        const threeDigit = classification.substring(0,3);
+
+        let classDesc = '미분류 또는 세부 주제';
+
+        if (kdcData[exactCode]) {
+            classDesc = kdcData[exactCode];
+        } else if (kdcData[threeDigit]) {
+            classDesc = kdcData[threeDigit];
+        } else if (kdcData[threeDigit[0] + '00']) {
+            classDesc = kdcData[threeDigit[0] + '00'];
+        }
+
+        html += `
+            <div class="card">
+                <h3>1️⃣ 분류기호 분석</h3>
+                <p>
+                    <strong>${classification}</strong>은(는)
+                    <span class="highlight">${classDesc}</span>
+                    분야를 의미합니다.<br>
+                    도서관에서는 이 번호를 기준으로 책의 위치를 정합니다.
+                </p>
+            </div>
+        `;
+    }
+
+    if (authorMatch) {
+        const lastName = authorMatch[1];
+        const authorNum = authorMatch[2];
+        const titleChar = authorMatch[3];
+
+        html += `
+            <div class="card">
+                <h3>2️⃣ 저자기호 분석</h3>
+                <p>
+                    <strong>${authorMatch[0]}</strong>은(는) 도서기호입니다.<br><br>
+
+                    • <strong>${lastName}</strong> : 저자의 성씨<br>
+                    • <strong>${authorNum}</strong> : 저자 구분 번호<br>
+                    • <strong>${titleChar}</strong> : 제목을 구분하기 위한 기호
+                </p>
+            </div>
+        `;
+    }
+
+    if (volMatch || copyMatch) {
+        html += `<div class="card"><h3>3️⃣ 추가 정보</h3><p>`;
+
+        if (volMatch) {
+            html += `• <span class="highlight">${volMatch[0]}</span> : ${volMatch[0].split('.')[1]}번째 권<br>`;
+        }
+
+        if (copyMatch) {
+            html += `• <span class="highlight">${copyMatch[0]}</span> : ${copyMatch[0].split('.')[1]}번째 복본`;
+        }
+
+        html += `</p></div>`;
+    }
+
+    if (!html) {
+        html = `
+            <div class="card">
+                ⚠️ 청구기호 형식을 인식하지 못했습니다.<br><br>
+                예시:<br>
+                • 911.05가56ㄱ<br>
+                • 813.6김64ㅎ<br>
+                • 005박32ㅈ v.2 c.1
+            </div>
+        `;
+    }
+
+    resultDiv.innerHTML = html;
+    resultDiv.style.display = 'block';
+}
+
+// Enter 키 지원
+
+document.getElementById('callNumber')
+.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        analyze();
+    }
+});
+</script>
+
+</body>
+</html>
