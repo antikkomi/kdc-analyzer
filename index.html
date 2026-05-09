@@ -126,7 +126,7 @@
             예시: <strong>813.6가123ㅎ v.2 c.1</strong><br><br>
 
             • <strong>813.6</strong> → 책의 주제를 의미합니다.<br>
-            • <strong>가123</strong> → 저자 및 제목 기호<br>
+            • <strong>가123</strong> → 저자의 성과 저자를 구분하는 저자기호 니다. <br>
             • 저자기호의 숫자는 <strong>소수점 읽듯이</strong> 읽습니다. 예를 들어 <strong>가123</strong>은 <strong>가98</strong>보다 앞에 배치됩니다.<br>
             • <strong>v.2</strong> → volume이라는 의미로,시리즈 중 몇번째인지 알려줍니다.<br>
             • <strong>c.1</strong> → copy라는 의미로, 몇번째 복본인지 알려줍니다.
@@ -294,13 +294,13 @@ function analyze() {
 
         html += `
             <div class="card">
-                <h3>2️⃣ 저자기호 분석</h3>
+                <h3>2️⃣ 도기호 분석</h3>
                 <p>
                     <strong>${authorMatch[0]}</strong>은(는) 도서기호입니다.<br><br>
 
                     • <strong>${lastName}</strong> : 저자의 성씨<br>
-                    • <strong>${authorNum}</strong> : 저자 구분 번호<br>
-                    • <strong>${titleChar}</strong> : 제목을 구분하기 위한 기호
+                    • <strong>${authorNum}</strong> : 저자 기호<br>
+                    • <strong>${titleChar}</strong> : 저작 기호(제목)
                 </p>
             </div>
         `;
@@ -325,8 +325,8 @@ function analyze() {
             <div class="card">
                 ⚠️ 청구기호 형식을 인식하지 못했습니다.<br><br>
                 예시:<br>
-                • 911.05가56ㄱ<br>
-                • 813.6김64ㅎ<br>
+                • 120.06가56ㄱ<br>
+                • 901.7김64ㅎ<br>
                 • 005박32ㅈ v.2 c.1
             </div>
         `;
