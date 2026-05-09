@@ -108,6 +108,47 @@
 <div class="container">
     <h2>📚 KDC 도서 청구기호 분석기</h2>
 
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; flex-wrap:wrap;">
+        <button onclick="toggleGuide()" style="background:#34a853; padding:12px 20px; border:none; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">
+            📖 청구기호 읽는 법
+        </button>
+
+        <button onclick="toggleKDC()" style="background:#fbbc05; padding:12px 20px; border:none; border-radius:10px; color:black; font-weight:bold; cursor:pointer;">
+            📚 KDC 요목 보기
+        </button>
+    </div>
+
+    <div id="guideBox" class="card" style="display:none;">
+        <h3>📖 청구기호 읽는 방법</h3>
+        <p>
+            청구기호는 책의 위치와 정보를 나타내는 기호입니다.<br><br>
+
+            예시: <strong>813.6김64ㅎ v.2 c.1</strong><br><br>
+
+            • <strong>813.6</strong> → 한국 소설 분야<br>
+            • <strong>김64ㅎ</strong> → 저자 및 제목 기호<br>
+            • 저자기호의 숫자는 <strong>소수점 읽듯이</strong> 읽습니다. 예를 들어 <strong>가123</strong>은 <strong>가98</strong>보다 앞에 배치됩니다.<br>
+            • <strong>v.2</strong> → 2번째 권<br>
+            • <strong>c.1</strong> → 1번째 복본
+        </p>
+    </div>
+
+    <div id="kdcBox" class="card" style="display:none;">
+        <h3>📚 KDC 대분류 요목</h3>
+        <p>
+            000 총류<br>
+            100 철학<br>
+            200 종교<br>
+            300 사회과학<br>
+            400 자연과학<br>
+            500 기술과학<br>
+            600 예술<br>
+            700 언어<br>
+            800 문학<br>
+            900 역사
+        </p>
+    </div>
+
     <div class="input-group">
         <input type="text" id="callNumber" placeholder="예: 911.05가56ㄱ v.1 c.2">
         <button onclick="analyze()">분석하기</button>
@@ -226,17 +267,13 @@ function analyze() {
         let classDesc = '미분류 또는 세부 주제';
 
         if (kdcData[exactCode]) {
-    classDesc = kdcData[exactCode];
+            classDesc = kdcData[exactCode];
+        } else if (kdcData[threeDigit]) {
+            classDesc = kdcData[threeDigit];
+        } else if (kdcData[threeDigit[0] + '00']) {
+            classDesc = kdcData[threeDigit[0] + '00'];
+        }
 
-} else if (kdcData[threeDigit]) {
-    classDesc = kdcData[threeDigit];
-
-} else if (kdcData[threeDigit.substring(0,2) + '0']) {
-    classDesc = kdcData[threeDigit.substring(0,2) + '0'];
-
-} else if (kdcData[threeDigit[0] + '00']) {
-    classDesc = kdcData[threeDigit[0] + '00'];
-}
         html += `
             <div class="card">
                 <h3>1️⃣ 분류기호 분석</h3>
@@ -257,7 +294,7 @@ function analyze() {
 
         html += `
             <div class="card">
-                <h3>2️⃣ 도서기호 분석</h3>
+                <h3>2️⃣ 저자기호 분석</h3>
                 <p>
                     <strong>${authorMatch[0]}</strong>은(는) 도서기호입니다.<br><br>
 
@@ -297,6 +334,16 @@ function analyze() {
 
     resultDiv.innerHTML = html;
     resultDiv.style.display = 'block';
+}
+
+function toggleGuide() {
+    const box = document.getElementById('guideBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleKDC() {
+    const box = document.getElementById('kdcBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
 }
 
 // Enter 키 지원
