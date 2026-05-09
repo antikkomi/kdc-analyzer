@@ -226,13 +226,17 @@ function analyze() {
         let classDesc = '미분류 또는 세부 주제';
 
         if (kdcData[exactCode]) {
-            classDesc = kdcData[exactCode];
-        } else if (kdcData[threeDigit]) {
-            classDesc = kdcData[threeDigit];
-        } else if (kdcData[threeDigit[0] + '00']) {
-            classDesc = kdcData[threeDigit[0] + '00'];
-        }
+    classDesc = kdcData[exactCode];
 
+} else if (kdcData[threeDigit]) {
+    classDesc = kdcData[threeDigit];
+
+} else if (kdcData[threeDigit.substring(0,2) + '0']) {
+    classDesc = kdcData[threeDigit.substring(0,2) + '0'];
+
+} else if (kdcData[threeDigit[0] + '00']) {
+    classDesc = kdcData[threeDigit[0] + '00'];
+}
         html += `
             <div class="card">
                 <h3>1️⃣ 분류기호 분석</h3>
@@ -253,7 +257,7 @@ function analyze() {
 
         html += `
             <div class="card">
-                <h3>2️⃣ 저자기호 분석</h3>
+                <h3>2️⃣ 도서기호 분석</h3>
                 <p>
                     <strong>${authorMatch[0]}</strong>은(는) 도서기호입니다.<br><br>
 
